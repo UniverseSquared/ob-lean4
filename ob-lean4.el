@@ -58,12 +58,17 @@
     (with-temp-file tmp-file (insert body))
     (org-babel-eval (format "%s %s" ob-lean4-lean-bin tmp-file) "")))
 
+(defun ob-lean4--execute-with-session (session-name body)
+  (let ((response (ob-lean4--evaluate-with-session session-name body)))
+    (ob-lean4--process-repl-response session-name response)))
+
 (defun org-babel-execute:lean4 (body params)
   (let* ((processed-params (org-babel-process-params params))
-         (session-name (cdr (assq :session processed-params))))
-    (if session-name
-        (ob-lean4--process-repl-response
-         session-name (ob-lean4--evaluate-with-session session-name body))
-      (ob-lean4--evaluate body))))
+         (session-config (assq :session processed-params))
+         (session-name (cdr session-config)))
+    (cond
+     ((and session-name session-config) (ob-lean4--execute-with-session session-name body))
+     (session-config (ob-lean4--execute-with-session :default body))
+     (t (ob-lean4--evaluate body)))))
 
 (provide 'ob-lean4)
