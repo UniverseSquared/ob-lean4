@@ -29,6 +29,9 @@
 
 (defun ob-lean4--initiate-session ()
   (let* ((default-directory (file-name-parent-directory ob-lean4-repl-bin))
+         (lean-path (file-name-parent-directory ob-lean4-lean-bin))
+         (process-environment (cons (format "PATH=%s" (concat (getenv "PATH") ":" lean-path))
+                                    process-environment))
          (process (make-process
                    :name "lean4-repl"
                    :buffer "*Lean*"
